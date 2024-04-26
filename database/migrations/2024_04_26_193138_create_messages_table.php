@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('messages', function (Blueprint $table) {
-            $table->id();
+            $table->uuid();
             $table->foreignId('user_id')
                 ->constrained('users')
                 ->cascadeOnUpdate()
@@ -22,7 +22,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
             $table->string('encryption_key');
-            $table->text('message');
+            $table->text('text');
             $table->boolean('read_once')->nullable();
             $table->timestamp('expiry_at')->nullable();
             $table->timestamps();
