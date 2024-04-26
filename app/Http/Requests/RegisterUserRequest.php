@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use App\Enums\User\UserStatus;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RegisterUserRequest extends FormRequest

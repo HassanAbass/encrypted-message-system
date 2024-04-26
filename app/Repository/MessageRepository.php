@@ -2,20 +2,24 @@
 
 namespace App\Repository;
 
+use App\Http\Requests\CreateMessageRequest;
 use App\Models\Message;
-use App\Models\User;
-use App\Http\Requests\RegisterUserRequest;
 
 class MessageRepository
 {
-    public function create(string $email): string
+
+    public function store(CreateMessageRequest $request): Message
     {
-        $user = Message::query()->where('email', $email)->first();
-        return $user->createToken('token')->accessToken;
+        return Message::query()->create($request->all());
     }
 
-    public function store(RegisterUserRequest $request): void
+    public function findById(string $uuid): Message
     {
-        Message::query()->create($request->all());
+        return Message::query()->find($uuid);
+    }
+
+    public function delete(string $uuid): void
+    {
+        Message::query()->where('id', $uuid)->delete();
     }
 }

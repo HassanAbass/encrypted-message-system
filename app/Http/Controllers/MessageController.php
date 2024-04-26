@@ -2,45 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\RegisterUserRequest;
-use App\Services\UserService;
-use App\Utilities\Trait\HasJsonResponse;
-use Carbon\Carbon;
+use App\Http\Requests\ReadMessageRequest;
+use App\Models\Message;
+use App\Services\MessageService;
 use Illuminate\Http\JsonResponse;
-use App\Http\Requests\LoginUserRequest;
-use Symfony\Component\HttpFoundation\Response;
+use App\Utilities\Trait\HasJsonResponse;
+use App\Http\Requests\CreateMessageRequest;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class MessageController extends Controller
 {
-    use HasJsonResponse;
-    public function __construct(private readonly UserService $userService)
+    use HasJsonResponse, HasUuids;
+
+    public function __construct(private readonly MessageService $messageService)
     {
     }
 
-    /**
-     * Handle an authentication attempt.
-     */
-    public function login(LoginUserRequest $request): JsonResponse
+    public function store(CreateMessageRequest $request): JsonResponse
     {
-        if (!auth()->attempt($request->all())) {
-            return response()->json(['message' => __('auth.failed')], Response::HTTP_UNAUTHORIZED);
-        }
-
-        return $this->respondWithToken($this->userService->getToken($request->email));
+        return $this->jsonResponse(__('messages.general.success'), $this->messageService->createMessage($request));
     }
 
-    private function respondWithToken(string $token): JsonResponse
+    public function getMessage(ReadMessageRequest $request): JsonResponse
     {
-        return $this->jsonResponse(__('messages.login.success'), [
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_date' => Carbon::now()->addHours(2)
+//        $this->messageService->getMessage($request);
+        return $this->jsonResponse(__('messages.general.success'), [
+            'text' => $this->messageService->getMessage($request->message_identifier, $request->encryption_key)
         ]);
-    }
-
-    public function register(RegisterUserRequest $request): JsonResponse
-    {
-        $this->userService->createUser($request);
-        return $this->respondWithToken($this->userService->getToken($request->email));
     }
 }
