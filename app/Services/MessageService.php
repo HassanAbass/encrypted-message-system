@@ -2,12 +2,11 @@
 
 namespace App\Services;
 
-use App\Http\Requests\ReadMessageRequest;
+use App\Jobs\DeleteExpiredMessagesJob;
 use App\Models\Message;
 use App\Repository\MessageRepository;
 use App\Http\Requests\CreateMessageRequest;
-use App\Utilities\Constants\GeneralConstants;
-use Illuminate\Support\Facades\Crypt;
+use App\Utilities\Constants\GeneralConstant;
 
 readonly class MessageService
 {
@@ -19,7 +18,14 @@ readonly class MessageService
     public function createMessage(CreateMessageRequest $request): Message
     {
         $request->merge(["text" => $this->encryptText($request->text, $request->encryption_key)]);
-        return $this->messageRepository->store($request);
+
+        $message = $this->messageRepository->store($request);
+
+        if ($message->expiry_at) {
+            dispatch(new DeleteExpiredMessagesJob($message->id))->delay($message->expiry_at);
+        }
+
+        return $message;
     }
 
     public function getMessage(string $messageId, string $key): false|string
@@ -27,27 +33,27 @@ readonly class MessageService
         $message = $this->messageRepository->findById($messageId);
 
         $decryptedMessage = $this->decryptText($message->text, $key);
-       // dd($decryptedMessage);
-//        if($message->read_once) {
-//            $this->messageRepository->delete($messageId);
-//        }
-//        dd($decryptedMessage);
+
+        if ($message->read_once) {
+            $this->deleteMessage($messageId);
+        }
 
         return $decryptedMessage;
     }
 
     private function encryptText(string $message, string $key): false|string
     {
-
-        return  openssl_encrypt($message, GeneralConstants::CIPHER_ALGO, $key, 0, '1234156782191011');
+        return openssl_encrypt($message, GeneralConstant::CIPHER_ALGO, $key, 0, GeneralConstant::CIPHER_IV);
     }
 
     private function decryptText(string $message, string $key): false|string
     {
-        $iv_length = openssl_cipher_iv_length(GeneralConstants::CIPHER_ALGO);
-        $iv = openssl_random_pseudo_bytes($iv_length);
-//        dd($iv);
-        return openssl_decrypt($message, GeneralConstants::CIPHER_ALGO, $key, 0, '1234156782191011');
+        return openssl_decrypt($message, GeneralConstant::CIPHER_ALGO, $key, 0, GeneralConstant::CIPHER_IV);
+    }
+
+    public function deleteMessage(string $messageId): void
+    {
+        $this->messageRepository->delete($messageId);
     }
 
 }

@@ -22,7 +22,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
             $table->string('encryption_key');
-            $table->binary('text');
+            $table->text('text');
             $table->boolean('read_once')->nullable();
             $table->timestamp('expiry_at')->nullable();
             $table->timestamps();
