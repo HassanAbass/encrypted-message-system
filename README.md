@@ -57,7 +57,8 @@ recipient could decrypt it using the same key it was encrypted with.
     ```bash
    php artisan serve
 
-# API Routes
+## API Routes 
+**Postman collection included**
 
 ### Messages
 - `POST api/messages`
