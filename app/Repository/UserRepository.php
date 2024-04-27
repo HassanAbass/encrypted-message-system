@@ -7,9 +7,14 @@ use App\Http\Requests\RegisterUserRequest;
 
 class UserRepository
 {
+    public function getUserByEmail(string $email): User
+    {
+        return User::query()->where('email', $email)->first();
+    }
+
     public function createUserToken(string $email): string
     {
-        $user = User::query()->where('email', $email)->first();
+        $user = $this->getUserByEmail($email);
         return $user->createToken('token')->accessToken;
     }
 

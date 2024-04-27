@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ReadMessageRequest;
-use App\Models\Message;
 use App\Services\MessageService;
 use Illuminate\Http\JsonResponse;
 use App\Utilities\Trait\HasJsonResponse;
@@ -25,7 +24,6 @@ class MessageController extends Controller
 
     public function getMessage(ReadMessageRequest $request): JsonResponse
     {
-//        $this->messageService->getMessage($request);
         return $this->jsonResponse(__('messages.general.success'), [
             'text' => $this->messageService->getMessage($request->message_identifier, $request->encryption_key)
         ]);

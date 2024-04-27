@@ -22,7 +22,7 @@ class AuthController extends Controller
      */
     public function login(LoginUserRequest $request): JsonResponse
     {
-        if (!auth()->attempt($request->all())) {
+        if (!$this->userService->authenticate($request->email, $request->password)) {
             return response()->json(['message' => __('auth.failed')], Response::HTTP_UNAUTHORIZED);
         }
 
