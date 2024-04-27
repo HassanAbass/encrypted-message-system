@@ -20,18 +20,4 @@ trait HasJsonResponse
 			"data" => $data
 		], $code);
 	}
-
-	public function errorResponse(string $message, \Throwable $exception = null, int $code = Response::HTTP_BAD_REQUEST, mixed $errors = null): JsonResponse
-	{
-		$exceptionMessage = $exception?->getMessage();
-		$responseData = collect([
-			"message" => $message,
-			"errors" => $errors ?? $exceptionMessage
-		]);
-		$responseJson = new JsonResponse($responseData, $code);
-		if ($exceptionMessage === $message || (!$exceptionMessage) && !$errors) {
-			$responseJson->setData($responseData->except(['errors']));
-		}
-		return $responseJson;
-	}
 }

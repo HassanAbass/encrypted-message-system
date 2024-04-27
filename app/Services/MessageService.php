@@ -28,9 +28,14 @@ readonly class MessageService
         return $message;
     }
 
-    public function getMessage(string $messageId, string $key): false|string
+    public function getMessage(string $messageId): Message
     {
-        $message = $this->messageRepository->findById($messageId);
+        return $this->messageRepository->findById($messageId);
+    }
+
+    public function getMessageText(string $messageId, string $key): false|string
+    {
+        $message = $this->getMessage($messageId);
 
         $decryptedMessage = $this->decryptText($message->text, $key);
 

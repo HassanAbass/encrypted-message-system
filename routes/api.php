@@ -12,4 +12,4 @@ Route::prefix('users')->group(function () {
 Route::prefix('messages')->group(function () {
     Route::post('', [MessageController::class, 'store']);
     Route::post('decrypted', [MessageController::class, 'getMessage']);
-})->middleware('auth:api');
+});

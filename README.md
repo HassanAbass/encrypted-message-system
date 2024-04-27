@@ -1,66 +1,90 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel Encrypted Messaging API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This Laravel project provides a RESTful API for encrypted messaging. Users can register, login, create encrypted messages, and decrypt messages using provided encryption keys.
 
-## About Laravel
+Both the sender/receiver of messages needs to be registered in system(could be changed) but in our case you register both users,
+user can register account and login, create his own message with expiry date, it will be encrypted using `AES-256-CBC` algorithm.
+recipient could decrypt it using the same key it was encrypted with.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Features
+- User authentication (Login/Register)
+- Create encrypted messages
+- Decrypt messages with provided encryption keys
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requirements
+- PHP >= 8.2
+- Laravel >= 11.x
+- Composer
+- Redis
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Installation
 
-## Learning Laravel
+1. Clone and initialize the repository:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+   ```bash
+   git clone git@github.com:HassanAbass/encrypted-message-system.git
+   cd laravel-encrypted-messaging
+   composer install
+   cp .env.example .env
+   php artisan key:generate
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+2. Connect you database of your choice in your `.env` file, **uncomment and add your credentials**:
+    ```bash
+    #DB_HOST=127.0.0.1
+    #DB_PORT=3306
+    #DB_DATABASE=db_name
+    #DB_USERNAME=root
+    #DB_PASSWORD=
+3. Run migration command to create your tables
+    ```bash
+   php artisan migrate
+4. Setup passport(oauth2) for authentication
+    ```bash
+    php artisan passport:client --personal --no-interaction
+5. Seed your database(optional) with user or create them(register endpoint)
+    ```bash
+    php artisan db:seed
+6. configure queue worker in your `.env` file, I'm using redis but feel free to add any other queue such as sqs
+    ```bash
+    REDIS_CLIENT=predis
+    REDIS_HOST=127.0.0.1
+    REDIS_PASSWORD=null
+    REDIS_PORT=6379
+7. Start the queue worker to delete the expired messages:
+    ```bash
+   php artisan queue:work
+8. You can start serve the application
+    ```bash
+   php artisan serve
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+# API Routes
 
-## Laravel Sponsors
+### Messages
+- `POST api/messages`
+    - Description: Store a message.
+    - Controller: MessageController@store
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- `POST api/messages/decrypted`
+    - Description: Get decrypted message.
+    - Controller: MessageController@getMessage
+### Users
+- `POST api/users/login`
+    - Description: User login.
+    - Controller: AuthController@login
+- `POST api/users/register`
+    - Description: Register a new user.
+    - Controller: AuthController@register
 
-### Premium Partners
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+# Application Architecture Overview
 
-## Contributing
+This Laravel application follows a structured architecture pattern with three main components:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+1. **Controller**: Responsible for handling incoming HTTP requests and controlling the flow of data.
 
-## Code of Conduct
+2. **Service**: Contains the application's business logic, orchestrates interactions between components, and abstracts complex operations.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+3. **Repository**: Provides an abstraction layer for database operations, promoting code maintainability and decoupling database logic from the rest of the application.
 
-## Security Vulnerabilities
+This architecture ensures maintainability, scalability, and separation of concerns, making the application easier to develop, test, and maintain.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
